@@ -1,5 +1,6 @@
 import express from 'express';
 import authRouter from './routes/auth.route.js';
+import fileRouter from './routes/file.route.js';
 import connectDB from './config/db.js';
 import cors from 'cors';
 
@@ -16,4 +17,5 @@ app.get('/', (req, res) => {
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRouter)
+app.use('/api/files', fileRouter)
 export default app;
