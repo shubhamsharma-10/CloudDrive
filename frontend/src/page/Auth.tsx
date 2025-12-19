@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../context/auth.context';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { 
@@ -10,6 +11,7 @@ import {
 } from '../components/ui/card';
 
 const Login = () => {
+    const { login, register } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,6 +19,24 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            if (isLogin) {
+                await login(email, password);
+            } else {
+                await register(email, password, name);
+            }
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } };
+            setError(error.response?.data?.message || 'An error occurred');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="dark min-h-screen flex items-center justify-center bg-background p-4">
