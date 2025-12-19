@@ -3,6 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client from '../config/s3.js';
 import config from '../config/config.js';
 import File from '../model/file.model.js';
+import { v4 as uuidv4 } from 'uuid';
 import { 
     DeleteObjectCommand, 
     GetObjectCommand, 
@@ -135,7 +136,94 @@ const fileController = {
             console.error('Download file error:', error);
             res.status(500).json({ message: 'Server error during downloading file' });
         }
-    }
+    },
+
+    enableSharing: async(req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            // @ts-ignore
+            const file = await File.findOne({ _id: id, userId: req.userId });
+            if (!file) {
+                res.status(404).json({ message: 'File not found' });
+                return;
+            }
+            if(file.isPublic){
+                res.status(400).json({ message: 'File is already shared' });
+                return;
+            }
+            file.isPublic = true;
+            file.sharedToken = uuidv4();
+            await file.save();
+            res.status(200).json({
+                message: 'File sharing enabled',
+                fileName: file.filename,
+                sharedToken: file.sharedToken,
+
+            })
+        } catch (error) {
+            console.error('Enable sharing error:', error);
+            res.status(500).json({ message: 'Server error during enabling sharing' });
+        }
+    },
+
+    disableSharing: async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            // @ts-ignore
+            const file = await File.findOne({ _id: id, userId: req.userId });
+            if (!file) {
+                res.status(404).json({ message: 'File not found' });
+                return;
+            }
+            if(!file.isPublic){
+                res.status(400).json({ message: 'File is not shared' });
+                return;
+            }
+            file.isPublic = false;
+            file.sharedToken = null;
+            await file.save();
+            res.status(200).json({
+                message: 'File sharing disabled',
+                fileName: file.filename
+            });     
+        } catch (error) {
+            console.error('Disable sharing error:', error);
+            res.status(500).json({ message: 'Server error during disabling sharing' });
+        }
+    },
+
+    getSharedFile: async(req: Request, res: Response) => {
+        try {
+            const { token } = req.params;
+            if(!token){
+                res.status(400).json({ message: 'No token provided' });
+                return;
+            }
+            const file = await File.findOne({ sharedToken: token, isPublic: true });
+            if (!file) {
+                res.status(404).json({ message: 'Shared file not found' });
+                return;
+            }
+            const command = new GetObjectCommand({
+                Bucket: config.aws.s3BucketName,
+                Key: file.s3Key
+            })
+            const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+            res.status(200).json({
+                message: 'Shared file fetched successfully',
+                file: {
+                    filename: file.filename,
+                    mimeType: file.mimeType,
+                    size: file.size,
+                    url
+                }
+            });
+        }
+        catch (error) {
+            console.error('Get shared file error:', error);
+            res.status(500).json({ message: 'Server error during fetching shared file' });
+        }
+    }   
 }
 
 export default fileController;
