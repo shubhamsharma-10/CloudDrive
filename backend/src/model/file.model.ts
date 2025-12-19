@@ -4,11 +4,13 @@ const FileSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        index: true
     },
     filename: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     s3Key: {
         type: String,

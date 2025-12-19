@@ -71,7 +71,8 @@ const fileController = {
         try {
             const { id } = req.params;
             const { newFilename } = req.body;
-            const file = await File.findById(id);
+            // @ts-ignore
+            const file = await File.findOne({ _id: id, userId: req.userId });
             if (!file) {
                 res.status(404).json({ message: 'File not found' });
                 return;
@@ -88,10 +89,40 @@ const fileController = {
         }
     },
 
+    searchFiles: async(req: Request, res: Response) => {
+        try {
+            const { query } = req.query;
+            console.log("Query: ", query);
+
+            if (!query || typeof query !== 'string') {
+            res.status(400).json({ message: 'Search query is required' });
+            return;
+        }
+    
+            const files = await File.find({
+                // @ts-ignore
+                userId: req.userId,
+                filename: { $regex: query, $options: "i" }
+            })
+            .sort({
+                createdAt: -1
+            })
+            
+            res.status(200).json({
+                message: 'Search completed successfully',
+                files
+            });
+            
+        } catch (error) {
+            
+        }
+    },
+
     deleteFile: async(req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const file = await File.findById(id);
+            // @ts-ignore
+            const file = await File.findOne({ _id: id, userId: req.userId });
             if (!file) {
                 res.status(404).json({ message: 'File not found' });
                 return;

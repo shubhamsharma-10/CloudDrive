@@ -11,6 +11,7 @@ fileRouter.use(authMiddleware)
 
 fileRouter.get('/', fileController.getFile);
 fileRouter.post('/upload', upload.single('file'), fileController.uploadFile);
+fileRouter.get('/search', fileController.searchFiles);
 fileRouter.put('/:id/rename', fileController.renameFile);
 fileRouter.delete('/:id', fileController.deleteFile);
 fileRouter.get('/:id/download', fileController.downloadFile);
