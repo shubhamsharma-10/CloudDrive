@@ -40,6 +40,7 @@ function SharedFile() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
+
     const getFileIcon = (mimeType: string): string => {
         if (mimeType.startsWith('image/')) return '🖼️';
         if (mimeType.startsWith('video/')) return '🎬';
@@ -88,7 +89,7 @@ function SharedFile() {
                                 </p>
                             </div>
                             <Button onClick={handleDownload} className="w-full" size="lg">
-                                ↓ Download File
+                                Download File
                             </Button>
                             <p className="text-xs text-center text-muted-foreground">
                                 This link may expire. Download now to save the file.

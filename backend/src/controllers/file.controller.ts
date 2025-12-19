@@ -13,17 +13,17 @@ import {
 const fileController = {
     uploadFile: async (req: Request, res: Response) => {
         try {
-            // @ts-ignore
             const userId = req.userId;
+            if (!userId) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
             const file = req.file;
-
 
             console.log("Files : ", file);
 
             if (!file) {
                 return res.status(400).json({ message: 'No file uploaded' });
             }
-            // @ts-ignore
             const s3key = `${userId}/${Date.now()}-${file.originalname}`
             console.log("S3 Key : ", s3key);
             const command = new PutObjectCommand({
@@ -55,8 +55,7 @@ const fileController = {
 
     getFile: async (req: Request, res: Response) => {
         try {
-            // @ts-ignore
-            const allFile = await File.find({ userId: req.userId }).sort({ createdAt: -1 })
+            const allFile = await File.find({ userId: req.userId! }).sort({ createdAt: -1 })
             res.status(200).json({
                 message: 'Files fetched successfully',
                 files: allFile
@@ -71,8 +70,7 @@ const fileController = {
         try {
             const { id } = req.params;
             const { newFilename } = req.body;
-            // @ts-ignore
-            const file = await File.findOne({ _id: id, userId: req.userId });
+            const file = await File.findOne({ _id: id, userId: req.userId! });
             if (!file) {
                 res.status(404).json({ message: 'File not found' });
                 return;
@@ -100,8 +98,7 @@ const fileController = {
             }
 
             const files = await File.find({
-                // @ts-ignore
-                userId: req.userId,
+                userId: req.userId!,
                 filename: { $regex: query, $options: "i" }
             })
                 .sort({
@@ -121,8 +118,7 @@ const fileController = {
     deleteFile: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            // @ts-ignore
-            const file = await File.findOne({ _id: id, userId: req.userId });
+            const file = await File.findOne({ _id: id, userId: req.userId! });
             if (!file) {
                 res.status(404).json({ message: 'File not found' });
                 return;
@@ -146,8 +142,7 @@ const fileController = {
     downloadFile: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            // @ts-ignore
-            const file = await File.findOne({ _id: id, userId: req.userId })
+            const file = await File.findOne({ _id: id, userId: req.userId! })
             if (!file) {
                 res.status(404).json({
                     message: 'File not found'
@@ -172,8 +167,7 @@ const fileController = {
     enableSharing: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            // @ts-ignore
-            const file = await File.findOne({ _id: id, userId: req.userId });
+            const file = await File.findOne({ _id: id, userId: req.userId! });
             if (!file) {
                 res.status(404).json({ message: 'File not found' });
                 return;
@@ -200,8 +194,7 @@ const fileController = {
     disableSharing: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            // @ts-ignore
-            const file = await File.findOne({ _id: id, userId: req.userId });
+            const file = await File.findOne({ _id: id, userId: req.userId! });
             if (!file) {
                 res.status(404).json({ message: 'File not found' });
                 return;
