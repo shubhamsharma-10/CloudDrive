@@ -4,14 +4,14 @@ import s3Client from '../config/s3.js';
 import config from '../config/config.js';
 import File from '../model/file.model.js';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-    DeleteObjectCommand, 
-    GetObjectCommand, 
-    PutObjectCommand 
+import {
+    DeleteObjectCommand,
+    GetObjectCommand,
+    PutObjectCommand
 } from '@aws-sdk/client-s3';
 
 const fileController = {
-    uploadFile: async(req: Request, res: Response) => {
+    uploadFile: async (req: Request, res: Response) => {
         try {
             // @ts-ignore
             const userId = req.userId;
@@ -19,14 +19,14 @@ const fileController = {
 
 
             console.log("Files : ", file);
-            
-            if(!file){
-                return res.status(400).json({message: 'No file uploaded'});
+
+            if (!file) {
+                return res.status(400).json({ message: 'No file uploaded' });
             }
             // @ts-ignore
             const s3key = `${userId}/${Date.now()}-${file.originalname}`
             console.log("S3 Key : ", s3key);
-            const command  = new PutObjectCommand({
+            const command = new PutObjectCommand({
                 Bucket: config.aws.s3BucketName,
                 Key: s3key,
                 Body: file.buffer,
@@ -52,11 +52,11 @@ const fileController = {
             res.status(500).json({ message: 'Server error during file upload' });
         }
     },
-    
-    getFile: async(req: Request, res: Response) => {
+
+    getFile: async (req: Request, res: Response) => {
         try {
             // @ts-ignore
-            const allFile = await File.find({ userId: req.userId}).sort({ createdAt: -1})
+            const allFile = await File.find({ userId: req.userId }).sort({ createdAt: -1 })
             res.status(200).json({
                 message: 'Files fetched successfully',
                 files: allFile
@@ -67,7 +67,7 @@ const fileController = {
         }
     },
 
-    renameFile: async(req: Request, res: Response) => {
+    renameFile: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
             const { newFilename } = req.body;
@@ -89,36 +89,36 @@ const fileController = {
         }
     },
 
-    searchFiles: async(req: Request, res: Response) => {
+    searchFiles: async (req: Request, res: Response) => {
         try {
             const { query } = req.query;
             console.log("Query: ", query);
 
             if (!query || typeof query !== 'string') {
-            res.status(400).json({ message: 'Search query is required' });
-            return;
-        }
-    
+                res.status(400).json({ message: 'Search query is required' });
+                return;
+            }
+
             const files = await File.find({
                 // @ts-ignore
                 userId: req.userId,
                 filename: { $regex: query, $options: "i" }
             })
-            .sort({
-                createdAt: -1
-            })
-            
+                .sort({
+                    createdAt: -1
+                })
+
             res.status(200).json({
                 message: 'Search completed successfully',
                 files
             });
-            
+
         } catch (error) {
-            
+
         }
     },
 
-    deleteFile: async(req: Request, res: Response) => {
+    deleteFile: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
             // @ts-ignore
@@ -148,7 +148,7 @@ const fileController = {
             const { id } = req.params;
             // @ts-ignore
             const file = await File.findOne({ _id: id, userId: req.userId })
-            if(!file) {
+            if (!file) {
                 res.status(404).json({
                     message: 'File not found'
                 })
@@ -169,7 +169,7 @@ const fileController = {
         }
     },
 
-    enableSharing: async(req: Request, res: Response) => {
+    enableSharing: async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
             // @ts-ignore
@@ -178,7 +178,7 @@ const fileController = {
                 res.status(404).json({ message: 'File not found' });
                 return;
             }
-            if(file.isPublic){
+            if (file.isPublic) {
                 res.status(400).json({ message: 'File is already shared' });
                 return;
             }
@@ -206,27 +206,29 @@ const fileController = {
                 res.status(404).json({ message: 'File not found' });
                 return;
             }
-            if(!file.isPublic){
+            if (!file.isPublic) {
                 res.status(400).json({ message: 'File is not shared' });
                 return;
             }
-            file.isPublic = false;
-            file.sharedToken = null;
-            await file.save();
+            // Use $unset to remove sharedToken field entirely (avoids duplicate null key error)
+            await File.findByIdAndUpdate(id, {
+                $set: { isPublic: false },
+                $unset: { sharedToken: 1 }
+            });
             res.status(200).json({
                 message: 'File sharing disabled',
                 fileName: file.filename
-            });     
+            });
         } catch (error) {
             console.error('Disable sharing error:', error);
             res.status(500).json({ message: 'Server error during disabling sharing' });
         }
     },
 
-    getSharedFile: async(req: Request, res: Response) => {
+    getSharedFile: async (req: Request, res: Response) => {
         try {
             const { token } = req.params;
-            if(!token){
+            if (!token) {
                 res.status(400).json({ message: 'No token provided' });
                 return;
             }
@@ -254,7 +256,7 @@ const fileController = {
             console.error('Get shared file error:', error);
             res.status(500).json({ message: 'Server error during fetching shared file' });
         }
-    }   
+    }
 }
 
 export default fileController;

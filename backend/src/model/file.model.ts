@@ -31,11 +31,11 @@ const FileSchema = new mongoose.Schema({
     sharedToken: {
         type: String,
         unique: true,
-        default: null
+        sparse: true  // Allows multiple documents without this field
     }
 }, {
     timestamps: true
-})  
+})
 
 const File = mongoose.model('File', FileSchema)
 

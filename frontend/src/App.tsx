@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, type ReactNode } from 'react';
+import { Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/auth.context';
 import Dashboard from './page/Dashboard';
 import Login from './page/Auth';
@@ -34,22 +34,39 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
   return user ? <Navigate to="/" /> : <>{children}</>;
 };
 
+const TokenHandler = ({ children }: { children: ReactNode }) => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (token) {
+      localStorage.setItem('token', token);
+      navigate('/', { replace: true });
+      window.location.reload();
+    }
+  }, [searchParams, navigate]);
+  return <>{children}</>;
+};
+
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-       <Route path="/shared/:shareToken" element={<SharedFile />} />
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+    <TokenHandler>
+      <Routes>
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/shared/:shareToken" element={<SharedFile />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </TokenHandler>
   );
 }
 
 function App() {
   return (
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 
