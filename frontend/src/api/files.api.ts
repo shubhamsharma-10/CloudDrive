@@ -59,6 +59,37 @@ const fileApi = {
 
         console.log("Download response: ", res);
         return res;
+    },
+
+    shareFile: async(id: string) => {
+        const res = await axios.post(`${config.apiBaseUrl}/files/${id}/share`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })  
+        console.log("Share response: ", res);
+        return res;
+    },
+
+    unshareFile: async(id: string) => {
+        const res = await axios.post(`${config.apiBaseUrl}/files/${id}/unshare`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })  
+        console.log("Unshare response: ", res);
+        return res;
+    },
+    getSharedFile: async(token: string) => {
+        const res = await axios.get(`${config.apiBaseUrl}/files/shared/${token}`, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })  
+        console.log("Get shared file response: ", res);
+        return res;
     }
 };
 
