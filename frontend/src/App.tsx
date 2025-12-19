@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/auth.context';
 import Dashboard from './page/Dashboard';
 import Login from './page/Auth';
+import SharedFile from './page/SharedFile';
 
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -38,6 +39,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+       <Route path="/shared/:shareToken" element={<SharedFile />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
