@@ -36,14 +36,10 @@ const Dashboard = () => {
 
     const fetchFiles = useCallback(async () => {
         try {
-            const response = await fileApi.getFiles();
-            let filteredFiles = response.data.files;
-            if (searchQuery) {
-                filteredFiles = filteredFiles.filter((f: FileItem) =>
-                    f.filename.toLowerCase().includes(searchQuery.toLowerCase())
-                );
-            }
-            setFiles(filteredFiles);
+            const response = searchQuery 
+            ? await fileApi.searchFile(searchQuery)
+            : await fileApi.getFiles();
+             setFiles(response.data.files);
         } catch (error) {
             console.error('Error fetching files:', error);
         } finally {

@@ -37,6 +37,17 @@ const fileApi = {
         return res;
     },
 
+    searchFile: async(query: string) => {
+        const res = await axios.get(`${config.apiBaseUrl}/files/search?query=${query}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+        console.log("Search response: ", res);
+        return res;
+    },
+
     deleteFile: async (id: string) => {
         const res = await axios.delete(`${config.apiBaseUrl}/files/${id}`, {
             headers: {
