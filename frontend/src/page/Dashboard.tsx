@@ -4,12 +4,21 @@ import fileApi from '../api/files.api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 
 interface FileItem {
     _id: string;
-    originalName: string;
+    filename: string;
     mimeType: string;
     size: number;
+    isPublic: boolean;
+    sharedToken?: string;
     createdAt: string;
 }
 
@@ -20,17 +29,21 @@ const Dashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [uploading, setUploading] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [shareLink, setShareLink] = useState<string | null>(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [newName, setNewName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-
     const fetchFiles = useCallback(async () => {
         try {
-            const response = searchQuery
-                ? await fileApi.searchFiles(searchQuery)
-                : await fileApi.getFiles();
-            setFiles(response.data.files);
+            const response = await fileApi.getFiles();
+            let filteredFiles = response.data.files;
+            if (searchQuery) {
+                filteredFiles = filteredFiles.filter((f: FileItem) =>
+                    f.filename.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+            setFiles(filteredFiles);
         } catch (error) {
             console.error('Error fetching files:', error);
         } finally {
@@ -46,9 +59,7 @@ const Dashboard = () => {
         if (fileList.length === 0) return;
         setUploading(true);
         try {
-            const res = await fileApi.uploadFiles(fileList[0]);
-
-            console.log("Upload response: ", res);
+            await fileApi.uploadFiles(fileList[0]);
             fetchFiles();
         } catch (error) {
             console.error('Upload error:', error);
@@ -82,23 +93,20 @@ const Dashboard = () => {
     const handleDownload = async (file: FileItem) => {
         try {
             const response = await fileApi.downloadFile(file._id);
-            console.log("Download response in dashboard: ", response.data);
             window.open(response.data.url, "_blank");
-            // window.location.href = response.data.url;
         } catch (error) {
             console.error('Download error:', error);
         }
     };
 
-    
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            console.log("Files: ", e.target.files[0]);
             uploadFiles(e.target.files);
             e.target.value = '';
         }
     };
-     const handleDragOver = (e: React.DragEvent) => {
+
+    const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragActive(true);
     };
@@ -116,6 +124,30 @@ const Dashboard = () => {
         }
     };
 
+    const handleShare = async (file: FileItem) => {
+        try {
+            if (file.isPublic) {
+                await fileApi.unshareFile(file._id);
+                setShareLink(null);
+            } else {
+                const response = await fileApi.shareFile(file._id);
+                const link = `${window.location.origin}/shared/${response.data.sharedToken}`;
+                setShareLink(link);
+                navigator.clipboard.writeText(link);
+            }
+            fetchFiles();
+        } catch (error) {
+            console.error('Share error:', error);
+        }
+    };
+
+    const handleCopyLink = (file: FileItem) => {
+        if (file.isPublic) {
+            const link = `${window.location.origin}/shared/${file.sharedToken}`;
+            navigator.clipboard.writeText(link);
+            setShareLink(link);
+        }
+    };
 
     const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 B';
@@ -126,7 +158,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="dark min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-background text-foreground">
             <header className="border-b border-border bg-card">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                     <h1 className="text-xl font-semibold">CloudDrive</h1>
@@ -138,6 +170,14 @@ const Dashboard = () => {
             </header>
 
             <main className="max-w-6xl mx-auto px-4 py-6">
+                {/* Share Link Toast */}
+                {shareLink && (
+                    <div className="mb-4 p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-center justify-between">
+                        <span className="text-sm">Link copied: <code className="text-xs bg-muted px-1 rounded">{shareLink}</code></span>
+                        <Button size="sm" variant="ghost" onClick={() => setShareLink(null)}>×</Button>
+                    </div>
+                )}
+
                 <Input
                     type="text"
                     value={searchQuery}
@@ -146,7 +186,7 @@ const Dashboard = () => {
                     className="max-w-sm mb-6"
                 />
 
-                  <Card
+                <Card
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
@@ -178,6 +218,7 @@ const Dashboard = () => {
                                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
                                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Size</th>
                                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Date</th>
+                                    <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
                                     <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
                                 </tr>
                             </thead>
@@ -193,6 +234,7 @@ const Dashboard = () => {
                                                         onChange={(e) => setNewName(e.target.value)}
                                                         className="h-8"
                                                         autoFocus
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleRename(file._id)}
                                                     />
                                                     <Button size="sm" onClick={() => handleRename(file._id)}>Save</Button>
                                                     <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); setNewName(''); }}>Cancel</Button>
@@ -203,12 +245,46 @@ const Dashboard = () => {
                                         </td>
                                         <td className="px-4 py-3 text-muted-foreground">{formatFileSize(file.size)}</td>
                                         <td className="px-4 py-3 text-muted-foreground">{new Date(file.createdAt).toLocaleDateString()}</td>
+                                        <td className="px-4 py-3">
+                                            {file.isPublic ? (
+                                                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Shared</span>
+                                            ) : (
+                                                <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">Private</span>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-3 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => handleDownload(file)}>Download</Button>
-                                                <Button size="sm" variant="ghost" onClick={() => { setEditingId(file._id); setNewName(file.originalName); }}>Rename</Button>
-                                                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(file._id)}>Delete</Button>
-                                            </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button size="sm" variant="ghost">
+                                                        <span className="sr-only">Actions</span>
+                                                        ⋮
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48">
+                                                    <DropdownMenuItem onClick={() => handleDownload(file)}>
+                                                        Download
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => { setEditingId(file._id); setNewName(file.filename); }}>
+                                                        Rename
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => handleShare(file)}>
+                                                        {file.isPublic ? 'Unshare' : 'Share'}
+                                                    </DropdownMenuItem>
+                                                    {file.isPublic && (
+                                                        <DropdownMenuItem onClick={() => handleCopyLink(file)}>
+                                                            Copy Link
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDelete(file._id)}
+                                                        className="text-destructive focus:text-destructive"
+                                                    >
+                                                        Delete
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </td>
                                     </tr>
                                 ))}
