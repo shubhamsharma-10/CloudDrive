@@ -10,6 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+import Sidebar from '../components/Sidebar';
 
 interface FileItem {
     _id: string;
@@ -154,12 +155,7 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen bg-[#111111] text-white flex">
-            {/* Sidebar */}
-            <aside className="w-64 bg-[#111111] border-r border-[#3c4043] flex flex-col">
-                <div className="p-4">
-                    <p className="text-gray-500 text-sm">Sidebar</p>
-                </div>
-            </aside>
+            <Sidebar onFileSelect={handleFileSelect} />
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
