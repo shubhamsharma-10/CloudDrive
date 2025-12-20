@@ -11,6 +11,7 @@ import {
     DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
 import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
 
 interface FileItem {
     _id: string;
@@ -157,12 +158,8 @@ const Dashboard = () => {
         <div className="min-h-screen bg-[#111111] text-white flex">
             <Sidebar onFileSelect={handleFileSelect} />
 
-            {/* Main Content */}
             <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <header className="h-16 border-b border-[#3c4043] flex items-center px-4">
-                    <p className="text-gray-500 text-sm">Header</p>
-                </header>
+                <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} userName={user?.name} />
 
                 {/* Main Area */}
                 <main
