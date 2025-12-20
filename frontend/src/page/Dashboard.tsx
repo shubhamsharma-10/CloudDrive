@@ -12,7 +12,7 @@ import {
 } from '../components/ui/dropdown-menu';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import { MoreVertical, FileText, FileImage, FileVideo, FileAudio, File } from 'lucide-react';
+import { MoreVertical, FileText, FileImage, FileVideo, FileAudio, File, ExternalLink, Download, Pencil, Copy, Share2, Link, FolderOpen, Info, WifiOff, Trash2, ChevronRight } from 'lucide-react';
 
 interface FileItem {
     _id: string;
@@ -267,14 +267,58 @@ const Dashboard = () => {
                                                         <MoreVertical className="w-4 h-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-48 bg-[#2d2f31] border-[#3c4043]">
-                                                    <DropdownMenuItem onClick={() => handleDownload(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">Download</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => { setEditingId(file._id); setNewName(file.filename); }} className="text-[#e8eaed] focus:bg-[#3c4043]">Rename</DropdownMenuItem>
+                                                <DropdownMenuContent align="start" side="right" className="w-56 bg-[#2d2f31] border-[#3c4043]">
+                                                    <DropdownMenuItem className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <ExternalLink className="w-4 h-4" />
+                                                        Open with
+                                                        <ChevronRight className="w-4 h-4 ml-auto" />
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleDownload(file)} className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <Download className="w-4 h-4" />
+                                                        Download
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => { setEditingId(file._id); setNewName(file.filename); }} className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <Pencil className="w-4 h-4" />
+                                                        Rename
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <Copy className="w-4 h-4" />
+                                                        Make a copy
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuSeparator className="bg-[#3c4043]" />
-                                                    <DropdownMenuItem onClick={() => handleShare(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">{file.isPublic ? 'Unshare' : 'Share'}</DropdownMenuItem>
-                                                    {file.isPublic && <DropdownMenuItem onClick={() => handleCopyLink(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">Copy Link</DropdownMenuItem>}
+                                                    <DropdownMenuItem onClick={() => handleShare(file)} className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <Share2 className="w-4 h-4" />
+                                                        {file.isPublic ? 'Stop sharing' : 'Share'}
+                                                        <ChevronRight className="w-4 h-4 ml-auto" />
+                                                    </DropdownMenuItem>
+                                                    {file.isPublic && (
+                                                        <DropdownMenuItem onClick={() => handleCopyLink(file)} className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                            <Link className="w-4 h-4" />
+                                                            Copy link
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <FolderOpen className="w-4 h-4" />
+                                                        Organize
+                                                        <ChevronRight className="w-4 h-4 ml-auto" />
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <Info className="w-4 h-4" />
+                                                        File information
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuSeparator className="bg-[#3c4043]" />
-                                                    <DropdownMenuItem onClick={() => handleDelete(file._id)} className="text-red-400 focus:bg-[#3c4043]">Move to trash</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <WifiOff className="w-4 h-4" />
+                                                        Make available offline
+                                                        <span className="w-8 h-4 bg-[#3c4043] rounded-full relative ml-auto">
+                                                            <span className="absolute left-0.5 top-0.5 w-3 h-3 bg-[#9aa0a6] rounded-full"></span>
+                                                        </span>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator className="bg-[#3c4043]" />
+                                                    <DropdownMenuItem onClick={() => handleDelete(file._id)} className="text-[#e8eaed] focus:bg-[#3c4043] gap-3">
+                                                        <Trash2 className="w-4 h-4" />
+                                                        Move to trash
+                                                    </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </div>
