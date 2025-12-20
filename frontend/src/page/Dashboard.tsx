@@ -12,6 +12,7 @@ import {
 } from '../components/ui/dropdown-menu';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { MoreVertical, FileText, FileImage, FileVideo, FileAudio, File } from 'lucide-react';
 
 interface FileItem {
     _id: string;
@@ -179,7 +180,9 @@ const Dashboard = () => {
                     <div className="mb-6">
                         <div className="flex items-center gap-2 mb-4">
                             <h2 className="text-xl font-medium text-[#e8eaed]">My Drive</h2>
-
+                            <svg className="w-5 h-5 text-[#9aa0a6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                         <div className="flex items-center gap-2">
                             <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#3c4043] text-sm text-[#e8eaed] hover:bg-[#3c4043]">
@@ -226,81 +229,61 @@ const Dashboard = () => {
                     ) : files.length === 0 ? (
                         <p className="text-center text-[#9aa0a6] py-12">No files yet. Upload your first file!</p>
                     ) : (
-                        <div className="bg-[#1e1e1e] rounded-xl border border-[#3c4043] overflow-hidden">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-[#3c4043]">
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9aa0a6]">Name</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9aa0a6]">Size</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9aa0a6]">Date</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9aa0a6]">Status</th>
-                                        <th className="px-4 py-3 text-right text-sm font-medium text-[#9aa0a6]">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {files.map((file) => (
-                                        <tr key={file._id} className="border-b border-[#3c4043] last:border-0 hover:bg-[#2d2f31]">
-                                            <td className="px-4 py-3">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            {files.map((file) => {
+                                const getFileIcon = () => {
+                                    if (file.mimeType.startsWith('image/')) return <FileImage className="w-6 h-6 text-red-400" />;
+                                    if (file.mimeType.startsWith('video/')) return <FileVideo className="w-6 h-6 text-purple-400" />;
+                                    if (file.mimeType.startsWith('audio/')) return <FileAudio className="w-6 h-6 text-yellow-400" />;
+                                    if (file.mimeType.includes('pdf')) return <FileText className="w-6 h-6 text-red-500" />;
+                                    if (file.mimeType.includes('document') || file.mimeType.includes('word')) return <FileText className="w-6 h-6 text-blue-400" />;
+                                    return <File className="w-6 h-6 text-gray-400" />;
+                                };
+                                return (
+                                    <div key={file._id} className="group bg-[#2d2f31] rounded-xl overflow-hidden border border-[#3c4043] hover:border-[#8ab4f8] transition-colors">
+                                        <div className="flex items-center justify-between px-3 py-2">
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                {getFileIcon()}
                                                 {editingId === file._id ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <Input
-                                                            type="text"
-                                                            value={newName}
-                                                            onChange={(e) => setNewName(e.target.value)}
-                                                            className="h-8 bg-[#2d2f31] border-[#3c4043]"
-                                                            autoFocus
-                                                            onKeyDown={(e) => e.key === 'Enter' && handleRename(file._id)}
-                                                        />
-                                                        <Button size="sm" onClick={() => handleRename(file._id)}>Save</Button>
-                                                        <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); setNewName(''); }}>Cancel</Button>
-                                                    </div>
+                                                    <Input
+                                                        type="text"
+                                                        value={newName}
+                                                        onChange={(e) => setNewName(e.target.value)}
+                                                        className="h-6 text-sm bg-[#1e1e1e] border-[#8ab4f8]"
+                                                        autoFocus
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') handleRename(file._id);
+                                                            if (e.key === 'Escape') { setEditingId(null); setNewName(''); }
+                                                        }}
+                                                        onBlur={() => { setEditingId(null); setNewName(''); }}
+                                                    />
                                                 ) : (
-                                                    <span className="font-medium text-[#e8eaed]">{file.filename}</span>
+                                                    <span className="text-sm text-[#e8eaed] truncate">{file.filename}</span>
                                                 )}
-                                            </td>
-                                            <td className="px-4 py-3 text-[#9aa0a6]">{formatFileSize(file.size)}</td>
-                                            <td className="px-4 py-3 text-[#9aa0a6]">{new Date(file.createdAt).toLocaleDateString()}</td>
-                                            <td className="px-4 py-3">
-                                                {file.isPublic ? (
-                                                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Shared</span>
-                                                ) : (
-                                                    <span className="text-xs bg-[#3c4043] text-[#9aa0a6] px-2 py-1 rounded">Private</span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button size="sm" variant="ghost" className="text-[#9aa0a6] hover:text-white">
-                                                            ⋮
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48 bg-[#2d2f31] border-[#3c4043]">
-                                                        <DropdownMenuItem onClick={() => handleDownload(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">
-                                                            Download
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => { setEditingId(file._id); setNewName(file.filename); }} className="text-[#e8eaed] focus:bg-[#3c4043]">
-                                                            Rename
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator className="bg-[#3c4043]" />
-                                                        <DropdownMenuItem onClick={() => handleShare(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">
-                                                            {file.isPublic ? 'Unshare' : 'Share'}
-                                                        </DropdownMenuItem>
-                                                        {file.isPublic && (
-                                                            <DropdownMenuItem onClick={() => handleCopyLink(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">
-                                                                Copy Link
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        <DropdownMenuSeparator className="bg-[#3c4043]" />
-                                                        <DropdownMenuItem onClick={() => handleDelete(file._id)} className="text-red-400 focus:bg-[#3c4043]">
-                                                            Delete
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0 text-[#9aa0a6] hover:text-white">
+                                                        <MoreVertical className="w-4 h-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48 bg-[#2d2f31] border-[#3c4043]">
+                                                    <DropdownMenuItem onClick={() => handleDownload(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">Download</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => { setEditingId(file._id); setNewName(file.filename); }} className="text-[#e8eaed] focus:bg-[#3c4043]">Rename</DropdownMenuItem>
+                                                    <DropdownMenuSeparator className="bg-[#3c4043]" />
+                                                    <DropdownMenuItem onClick={() => handleShare(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">{file.isPublic ? 'Unshare' : 'Share'}</DropdownMenuItem>
+                                                    {file.isPublic && <DropdownMenuItem onClick={() => handleCopyLink(file)} className="text-[#e8eaed] focus:bg-[#3c4043]">Copy Link</DropdownMenuItem>}
+                                                    <DropdownMenuSeparator className="bg-[#3c4043]" />
+                                                    <DropdownMenuItem onClick={() => handleDelete(file._id)} className="text-red-400 focus:bg-[#3c4043]">Move to trash</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                        <div className="h-32 bg-white flex items-center justify-center">
+                                            {getFileIcon()}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </main>
