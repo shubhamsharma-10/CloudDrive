@@ -177,8 +177,30 @@ const Dashboard = () => {
                     )}
 
                     <div className="mb-6">
-                        <h2 className="text-xl font-medium text-[#e8eaed] mb-4">My Drive</h2>
-                        <p className="text-gray-500 text-sm mb-4">Main content area</p>
+                        <div className="flex items-center gap-2 mb-4">
+                            <h2 className="text-xl font-medium text-[#e8eaed]">My Drive</h2>
+
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#3c4043] text-sm text-[#e8eaed] hover:bg-[#3c4043]">
+                                Type
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#3c4043] text-sm text-[#e8eaed] hover:bg-[#3c4043]">
+                                People
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#3c4043] text-sm text-[#e8eaed] hover:bg-[#3c4043]">
+                                Modified
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <input
