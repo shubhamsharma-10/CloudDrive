@@ -12,6 +12,7 @@ interface HeaderProps {
     onSearchChange: (value: string) => void;
     userName?: string;
     onLogout?: () => void;
+    avatar?: string;
 }
 
 const Header = ({ searchQuery, onSearchChange, userName, onLogout, avatar }: HeaderProps) => {

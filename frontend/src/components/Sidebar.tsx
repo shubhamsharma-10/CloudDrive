@@ -21,7 +21,7 @@ const Sidebar = ({ onFileSelect }: SidebarProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
-        <aside className="w-64 bg-[#111111] border-r border-[#3c4043] flex flex-col">
+        <aside className="w-64 bg-[#1f1f1f] flex flex-col">
             <div className="p-4">
                 <h1 className="text-xl font-medium text-[#e8eaed]">CloudDrive</h1>
             </div>
@@ -29,7 +29,7 @@ const Sidebar = ({ onFileSelect }: SidebarProps) => {
             <div className="px-3 py-2">
                 <Button
                     onClick={() => fileInputRef.current?.click()}
-                    className="justify-start gap-2 bg-[#2d2f31] hover:bg-[#3c4043] text-white border border-[#3c4043] rounded-2xl h-12 px-4 text-sm font-medium shadow-md"
+                    className="justify-start gap-2 bg-[#2d2f31] hover:bg-[#3c4043] text-white rounded-xl h-12 w-22 px-4 text-sm font-medium shadow-md"
                 >
                     <Plus className="w-5 h-5" />
                     New
@@ -43,7 +43,7 @@ const Sidebar = ({ onFileSelect }: SidebarProps) => {
                 />
             </div>
 
-            <nav className="flex-1 px-3 py-2">
+            <nav className="px-3 py-2">
                 {navItems.map((item) => (
                     <button
                         key={item.label}
@@ -58,7 +58,7 @@ const Sidebar = ({ onFileSelect }: SidebarProps) => {
                 ))}
             </nav>
 
-            <div className="px-4 py-4 border-t border-[#3c4043]">
+            <div className="px-4 py-4">
                 <div className="w-full h-1 bg-[#3c4043] rounded-full overflow-hidden mb-2">
                     <div className="h-full w-[94%] bg-[#8ab4f8] rounded-full"></div>
                 </div>

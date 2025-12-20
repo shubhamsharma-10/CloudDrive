@@ -147,24 +147,15 @@ const Dashboard = () => {
         }
     };
 
-    const formatFileSize = (bytes: number): string => {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-    };
-
     return (
-        <div className="min-h-screen bg-[#111111] text-white flex">
+        <div className="min-h-screen bg-[#1f1f1f] text-white flex">
             <Sidebar onFileSelect={handleFileSelect} />
 
             <div className="flex-1 flex flex-col">
-                <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} userName={user?.name} />
+                <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} userName={user?.name} onLogout={logout} avatar={user?.avatar}/>
 
-                {/* Main Area */}
                 <main
-                    className="flex-1 p-6 overflow-auto"
+                    className={`flex-1 p-6 overflow-auto bg-[#141414] rounded-tl-2xl transition-colors ${isDragActive ? 'bg-[#004a77]/10 border-2 border-dashed border-[#8ab4f8]' : ''}`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
@@ -214,20 +205,12 @@ const Dashboard = () => {
                         className="hidden"
                     />
 
-                    <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`p-8 mb-6 border-2 border-dashed rounded-xl cursor-pointer text-center transition-colors
-                            ${isDragActive ? 'border-[#8ab4f8] bg-[#004a77]/20' : 'border-[#3c4043] hover:border-[#5f6368]'}`}
-                    >
-                        <p className="text-[#9aa0a6]">
-                            {uploading ? 'Uploading...' : isDragActive ? 'Drop files here' : 'Drag & drop files, or click to select'}
-                        </p>
-                    </div>
-
-                    {loading ? (
+                    {uploading ? (
+                        <p className="text-center text-[#8ab4f8] py-12">Uploading...</p>
+                    ) : loading ? (
                         <p className="text-center text-[#9aa0a6] py-12">Loading...</p>
                     ) : files.length === 0 ? (
-                        <p className="text-center text-[#9aa0a6] py-12">No files yet. Upload your first file!</p>
+                        <p className="text-center text-[#9aa0a6] py-12">No files yet. Click "New" or drop files here!</p>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                             {files.map((file) => {
